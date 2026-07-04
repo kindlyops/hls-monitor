@@ -46,15 +46,15 @@ cannot be installed in mobile Chrome itself.
 - **iOS/iPadOS**: there is currently no way to run Chrome extensions on
   iOS. Monitor a stream from a desktop browser instead.
 
-### Releasing a new version
+### Releases
 
-Push a version tag and GitHub Actions builds the ZIP, stamps the version
-into the manifest, and publishes a GitHub Release:
+Every merge to `main` that changes `extension/` automatically publishes a
+new GitHub Release: the workflow patch-bumps the latest version tag (e.g.
+`v0.1.3` → `v0.1.4`, starting at `v0.1.0`), stamps the version into
+`manifest.json`, and attaches the installable ZIP.
 
-```sh
-git tag v0.2.0
-git push origin v0.2.0
-```
+For a minor or major bump, run the **Release extension** workflow manually
+from the Actions tab and enter the version (e.g. `0.3.0`).
 
 ## Use
 
