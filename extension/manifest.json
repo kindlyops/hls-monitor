@@ -3,10 +3,14 @@
   "name": "HLS Monitor",
   "version": "0.1.0",
   "description": "Monitor performance and availability of HLS live streams: per-segment TTFB, download time, throughput, errors, and playlist health.",
-  "permissions": ["webRequest", "storage", "tabs"],
+  "minimum_chrome_version": "116",
+  "permissions": ["webRequest", "storage", "tabs", "sidePanel"],
   "host_permissions": ["<all_urls>"],
   "background": {
     "service_worker": "background.js"
+  },
+  "side_panel": {
+    "default_path": "sidepanel.html"
   },
   "action": {
     "default_popup": "popup.html",

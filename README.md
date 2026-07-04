@@ -61,9 +61,15 @@ git push origin v0.2.0
 - **Popup** (click the toolbar icon): at-a-glance health of the stream in the
   active tab — status, segment count, errors, average TTFB/throughput,
   download speed, and last-segment age.
-- **Dashboard** (popup → *Open dashboard*): live charts of per-segment TTFB
-  and throughput, playlist health (refresh cadence, media sequence,
-  advancement), a table of recent requests, and **Export JSON** for offline
+- **Side panel** (popup → *Open side panel*): the dashboard docked next to
+  the player page, so you can watch the livestream and its metrics at the
+  same time. It follows the active tab, and its header has a live segment
+  counter with a pulse animation that fires each time a new video segment
+  arrives.
+- **Full dashboard** (popup → *Full dashboard*): the same view as a full
+  page — live charts of per-segment TTFB and throughput, playlist health
+  (refresh cadence, media sequence, advancement), a table of recent
+  requests, the segment-arrival pulse, and **Export JSON** for offline
   analysis. Opening `panel.html` without a `?tab=` parameter lists all tabs
   with detected streams.
 

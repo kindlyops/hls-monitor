@@ -36,6 +36,17 @@ $("openPanel").addEventListener("click", () => {
   chrome.tabs.create({ url: chrome.runtime.getURL("panel.html?tab=" + tabId) });
 });
 
+$("openSide").addEventListener("click", async () => {
+  // Must run synchronously off the click (user gesture) to be allowed.
+  try {
+    await chrome.sidePanel.open({ tabId });
+    window.close();
+  } catch (e) {
+    console.error("side panel open failed:", e);
+  }
+});
+if (!chrome.sidePanel) $("openSide").style.display = "none";
+
 chrome.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
   if (tabs[0]) tabId = tabs[0].id;
   refresh();

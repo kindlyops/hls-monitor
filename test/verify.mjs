@@ -105,6 +105,26 @@ const shot = path.join(here, "..", "dashboard.png");
 await panel.screenshot({ path: shot, fullPage: true });
 console.log("\ndashboard screenshot:", shot);
 
+// side panel (compact mode): follows the active tab, pulses on new segments
+const side = await context.newPage();
+await side.setViewportSize({ width: 380, height: 950 });
+await side.goto(`chrome-extension://${extId}/sidepanel.html`);
+await page.bringToFront(); // side panel should follow the active (player) tab
+await side.waitForTimeout(5000);
+const live1 = Number(await side.locator("#segLive").textContent());
+await side.waitForTimeout(3000);
+const live2 = Number(await side.locator("#segLive").textContent());
+const pulsed = await side.evaluate(() =>
+  document.getElementById("segPulse").classList.contains("pulse")
+);
+console.log("\nside panel checks:");
+check(live1 > 0, `side panel follows active tab, shows segment counter (got ${live1})`);
+check(live2 > live1, `segment counter increments live (${live1} -> ${live2})`);
+check(pulsed, "segment-arrival pulse fired");
+const sideShot = path.join(here, "..", "sidepanel.png");
+await side.screenshot({ path: sideShot });
+console.log("side panel screenshot:", sideShot);
+
 await context.close();
 server.kill();
 
