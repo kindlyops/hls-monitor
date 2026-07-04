@@ -46,6 +46,18 @@
       background: var(--surface-1);
     }
     .back { display: inline-block; margin-bottom: 18px; }
+    .getBtn {
+      display: inline-block;
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      color: #fff;
+      background: var(--series-1);
+    }
+    details { margin-top: 4px; }
+    summary { cursor: pointer; margin-bottom: 10px; }
   </style>
 </head>
 <body>
@@ -63,24 +75,28 @@
     <span class="badge">Recommended on iPad &amp; iPhone</span>
     <h2>Apple Shortcut — "Monitor HLS" in the share sheet</h2>
     <p class="why">
-      A one-time, two-action shortcut. Afterwards: play a stream in Safari,
-      tap <b>Share&nbsp;→&nbsp;Monitor&nbsp;HLS</b>, and the dashboard opens.
+      One tap to install. Afterwards: play a stream in Safari, tap
+      <b>Share&nbsp;→&nbsp;Monitor&nbsp;HLS</b>, and the dashboard opens.
+      (The first run asks permission to run JavaScript on the page — allow it.)
     </p>
-    <!-- TODO(maintainer): once the shortcut is shared via Shortcuts →
-         Share → Copy iCloud Link, add a prominent "Get the Shortcut"
-         button here so visitors can skip the manual build. -->
-    <ol>
-      <li>Open the <b>Shortcuts</b> app and create a new shortcut.</li>
-      <li>Add the action <b>Run JavaScript on Web Page</b> (search "javascript") and replace its example code with the code below.</li>
-      <li>Add an <b>Open URLs</b> action after it — set its URL to the magic variable <b>JavaScript Result</b>.</li>
-      <li>Name it <b>Monitor HLS</b>. In the shortcut's info panel, enable <b>Show in Share Sheet</b>.</li>
-      <li>Play a stream in Safari, tap Share → Monitor HLS.</li>
-    </ol>
-    <div class="copyRow">
-      <button id="copyShortcut" class="primary">Copy shortcut code</button>
-      <span id="copiedShortcut" class="muted" hidden>copied</span>
-    </div>
-    <pre id="shortcutCode">loading…</pre>
+    <p>
+      <a class="getBtn" href="https://www.icloud.com/shortcuts/9cdd5023d6f84dc3b01a5444f1db9969">Get the Shortcut</a>
+    </p>
+    <details>
+      <summary class="muted">Or build it yourself (2 minutes)</summary>
+      <ol>
+        <li>Open the <b>Shortcuts</b> app and create a new shortcut.</li>
+        <li>Add the action <b>Run JavaScript on Web Page</b> (search "javascript") and replace its example code with the code below.</li>
+        <li>Add an <b>Open URLs</b> action after it — set its URL to the magic variable <b>JavaScript Result</b>.</li>
+        <li>Name it <b>Monitor HLS</b>. In the shortcut's info panel, enable <b>Show in Share Sheet</b>.</li>
+        <li>Play a stream in Safari, tap Share → Monitor HLS.</li>
+      </ol>
+      <div class="copyRow">
+        <button id="copyShortcut" class="primary">Copy shortcut code</button>
+        <span id="copiedShortcut" class="muted" hidden>copied</span>
+      </div>
+      <pre id="shortcutCode">loading…</pre>
+    </details>
   </section>
 
   <section class="card">
