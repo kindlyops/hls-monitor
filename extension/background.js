@@ -32,6 +32,19 @@ chrome.storage.onChanged.addListener((changes, area) => {
   }
 });
 
+// The side panel is only offered on tabs with a detected HLS stream: the
+// default is disabled, and tabs are enabled individually on detection.
+// (Side-panel options are in-memory, so this runs on every worker start.)
+chrome.sidePanel.setOptions({ enabled: false }).catch(() => {});
+function enableSidePanel(tabId) {
+  chrome.sidePanel
+    .setOptions({ tabId, path: "sidepanel.html", enabled: true })
+    .catch(() => {});
+}
+function disableSidePanel(tabId) {
+  chrome.sidePanel.setOptions({ tabId, enabled: false }).catch(() => {});
+}
+
 const restored = chrome.storage.session.get("hlsState").then((r) => {
   const old = r.hlsState;
   if (!old || !old.tabs) return;
@@ -53,6 +66,9 @@ const restored = chrome.storage.session.get("hlsState").then((r) => {
       cur.totals.errors += oldTab.totals.errors;
       cur.detectedAt = oldTab.detectedAt || cur.detectedAt;
     }
+  }
+  for (const [tabId, tab] of Object.entries(state.tabs)) {
+    if (tab.detectedAt) enableSidePanel(Number(tabId));
   }
 }).catch(() => {});
 
@@ -202,7 +218,10 @@ function finalize(rec, { end, bytes, error }) {
   if (failed) tab.totals.errors += 1;
 
   if (rec.kind === "playlist") {
-    if (!tab.detectedAt) tab.detectedAt = rec.start;
+    if (!tab.detectedAt) {
+      tab.detectedAt = rec.start;
+      enableSidePanel(rec.tabId);
+    }
     recordPlaylistFetch(tab, url, record, failed);
   }
   updateBadge(rec.tabId, tab);
@@ -376,6 +395,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
   if (changeInfo.url && tab.pageUrl && changeInfo.url !== tab.pageUrl) {
     delete state.tabs[tabId];
     chrome.action.setBadgeText({ tabId, text: "" }).catch(() => {});
+    disableSidePanel(tabId);
     scheduleSave();
   } else if (changeInfo.url) {
     tab.pageUrl = changeInfo.url;

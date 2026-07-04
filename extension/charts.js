@@ -11,6 +11,7 @@ export class LineChart {
     this.canvas = canvas;
     this.opts = opts;
     this.points = []; // {t, v, label}
+    this.marks = []; // {t, label} - failed requests, drawn as vertical marks
     this.hoverIdx = null;
 
     this.tooltip = document.createElement("div");
@@ -31,6 +32,10 @@ export class LineChart {
   setData(points) {
     this.points = points;
     this.draw();
+  }
+
+  setMarks(marks) {
+    this.marks = marks || [];
   }
 
   layout() {
@@ -109,6 +114,27 @@ export class LineChart {
         String(d.getSeconds()).padStart(2, "0");
       ctx.fillStyle = muted;
       ctx.fillText(label, S.x(t), L.pad.t + L.ph + 5);
+    }
+
+    // error marks: dashed vertical line + ✗ at each failed request
+    const crit = cssVar("--status-critical");
+    for (const m of this.marks) {
+      if (m.t < S.t0 || m.t > S.t1) continue;
+      const xx = S.x(m.t);
+      ctx.strokeStyle = crit;
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 3]);
+      ctx.beginPath();
+      ctx.moveTo(xx, L.pad.t);
+      ctx.lineTo(xx, L.pad.t + L.ph);
+      ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = crit;
+      ctx.font = "bold 11px system-ui, sans-serif";
+      ctx.textAlign = "center";
+      ctx.textBaseline = "middle";
+      ctx.fillText("✗", xx, L.pad.t + 6);
+      ctx.font = "10px system-ui, sans-serif";
     }
 
     // series line

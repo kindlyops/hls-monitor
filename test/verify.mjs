@@ -117,10 +117,17 @@ const live2 = Number(await side.locator("#segLive").textContent());
 const pulsed = await side.evaluate(() =>
   document.getElementById("segPulse").classList.contains("pulse")
 );
+const spOpts = await sw.evaluate(async (tid) => {
+  const on = await chrome.sidePanel.getOptions({ tabId: tid });
+  const def = await chrome.sidePanel.getOptions({});
+  return { on: !!on.enabled, def: !!def.enabled };
+}, tabId);
 console.log("\nside panel checks:");
 check(live1 > 0, `side panel follows active tab, shows segment counter (got ${live1})`);
 check(live2 > live1, `segment counter increments live (${live1} -> ${live2})`);
 check(pulsed, "segment-arrival pulse fired");
+check(spOpts.on, "side panel enabled on the stream tab");
+check(!spOpts.def, "side panel disabled by default on non-stream tabs");
 const sideShot = path.join(here, "..", "sidepanel.png");
 await side.screenshot({ path: sideShot });
 console.log("side panel screenshot:", sideShot);

@@ -65,7 +65,9 @@ from the Actions tab and enter the version (e.g. `0.3.0`).
   the player page, so you can watch the livestream and its metrics at the
   same time. It follows the active tab, and its header has a live segment
   counter with a pulse animation that fires each time a new video segment
-  arrives.
+  arrives. The panel is only available on tabs with a detected stream —
+  switching to a tab without one hides it. Failed requests are drawn as red
+  ✗ marks on the charts.
 - **Full dashboard** (popup → *Full dashboard*): the same view as a full
   page — live charts of per-segment TTFB and throughput, playlist health
   (refresh cadence, media sequence, advancement), a table of recent
