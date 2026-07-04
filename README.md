@@ -43,8 +43,32 @@ cannot be installed in mobile Chrome itself.
 - **Android**: use a Chromium-based browser that supports extensions — for
   example **Microsoft Edge Canary** or **Lemur Browser**. Enable developer
   mode on its extensions page and load the same release ZIP.
-- **iOS/iPadOS**: there is currently no way to run Chrome extensions on
-  iOS. Monitor a stream from a desktop browser instead.
+- **iOS/iPadOS**: there is no way to run Chrome extensions on iOS — use the
+  [monitor page](#monitor-without-the-extension-ipad-mobile-any-browser)
+  instead, which needs no install at all.
+
+## Monitor without the extension (iPad, mobile, any browser)
+
+**<https://kindlyops.github.io/hls-monitor/monitor.html>** is a standalone
+monitor: give it an `.m3u8` URL and it fetches the playlist and segments
+itself on the standard HLS cadence, measuring every request — the same
+dashboard as the extension, in any browser on any device. It doesn't decode
+video; like the extension, it measures delivery. Master playlists get a
+variant picker (highest bandwidth auto-selected). The only requirement is
+that the stream's server sends CORS headers, which nearly all CDNs do.
+
+Two one-tap launchers discover the stream URL on whatever page is currently
+playing it (from Resource Timing and `<video>` elements) and open the
+monitor — set them up at
+**<https://kindlyops.github.io/hls-monitor/ipad.html>**:
+
+- an **Apple Shortcuts** share-sheet action (best on iPad/iPhone), and
+- a **bookmarklet** (works everywhere, including desktop browsers, with
+  zero install).
+
+Limitations vs the extension: launchers can't see players inside
+cross-origin iframes, and the monitor measures its own fetches rather than
+the page player's traffic.
 
 ### Releases
 
@@ -119,13 +143,29 @@ python3 test/server.py --slow-every 4 --slow-ms 1500   # inject latency
 
 Then open <http://127.0.0.1:8765/> in Chrome with the extension loaded.
 
+The monitor page works against the same fake origin — handy on any device
+on your LAN:
+
+```sh
+python3 test/server.py --fail-every 5
+python3 -m http.server 8899 -d site
+# open http://127.0.0.1:8899/monitor.html and paste
+# http://127.0.0.1:8765/stream/live.m3u8
+```
+
 ## Automated end-to-end check
 
 ```sh
-node test/verify.mjs
+node test/verify.mjs          # extension
+node test/verify-monitor.mjs  # monitor page + launcher discovery
 ```
 
-Starts the fake origin, loads the extension into headless Chromium via
-Playwright, streams for ~14s, asserts the recorded metrics (TTFB, sizes,
-parsed durations, media-sequence tracking, injected 404s), and screenshots
-the dashboard to `dashboard.png`.
+`verify.mjs` starts the fake origin, loads the extension into headless
+Chromium via Playwright, streams for ~14s, asserts the recorded metrics
+(TTFB, sizes, parsed durations, media-sequence tracking, injected 404s),
+and screenshots the dashboard to `dashboard.png`.
+
+`verify-monitor.mjs` does the same for the monitor page (served statically
+from `site/`), and also runs the launcher discovery snippet inside the
+synthetic player page and asserts it finds the playlist URL. Screenshot goes
+to `monitor.png`.
