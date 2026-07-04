@@ -37,7 +37,7 @@ export class LineChart {
     const dpr = window.devicePixelRatio || 1;
     const rect = this.canvas.parentElement.getBoundingClientRect();
     const w = Math.max(100, rect.width - 2);
-    const h = 180;
+    const h = this.opts.height || 180;
     this.canvas.style.width = w + "px";
     this.canvas.style.height = h + "px";
     this.canvas.width = Math.round(w * dpr);
