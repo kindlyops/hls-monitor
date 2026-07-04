@@ -554,9 +554,15 @@ function initDashboard() {
     $("seqAge").textContent =
       main && main.lastSeqChangeAt ? "advanced " + fmtAgo(now - main.lastSeqChangeAt) : "";
 
+    // charts: successful segments as the series; failures as vertical marks
     const okSegs = state.segments.filter(
       (r) => r.kind === "segment" && !r.error && r.status && r.status < 400
     );
+    const failMarks = state.segments
+      .filter((r) => r.error || (r.status && r.status >= 400))
+      .map((r) => ({ t: r.end, label: r.error || "HTTP " + r.status, name: r.name }));
+    ttfbChart.setMarks(failMarks);
+    bpsChart.setMarks(failMarks);
     ttfbChart.setData(
       okSegs.filter((r) => r.ttfbMs !== null).map((r) => ({ t: r.end, v: r.ttfbMs, label: r.name }))
     );
