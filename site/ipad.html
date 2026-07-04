@@ -9,7 +9,17 @@
   <style>
     body { max-width: 720px; margin: 0 auto; padding: 24px 20px 60px; font-size: 14px; }
     h1 { font-size: 24px; margin: 0 0 6px; }
-    .lede { color: var(--text-secondary); margin: 0 0 26px; line-height: 1.5; }
+    .lede { color: var(--text-secondary); margin: 0 0 18px; line-height: 1.5; }
+    #corsNote {
+      border: 1px solid var(--status-warning);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin: 0 0 26px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+      background: var(--surface-1);
+    }
+    #corsNote b { color: var(--text-primary); }
     section.card { margin-bottom: 18px; padding: 16px 18px; }
     section.card h2 { font-size: 16px; color: var(--text-primary); margin-bottom: 4px; }
     section.card .why { color: var(--text-secondary); margin: 0 0 12px; line-height: 1.5; }
@@ -70,6 +80,18 @@
     request. The two launchers below grab the stream URL from whatever page
     is currently playing it and open the monitor in one tap.
   </p>
+  <div id="corsNote">
+    <b>Works only on CORS-enabled streams.</b> A web page may read another
+    origin's responses only if that server sends
+    <code>Access-Control-Allow-Origin</code>, and many streams don't. If the
+    monitor reports a CORS error, that stream can't be measured from any
+    browser page — that's a browser rule, not a bug. Use the
+    <a href="https://github.com/kindlyops/hls-monitor">Chrome extension</a>
+    on desktop for those; it watches the player's own traffic and needs no
+    CORS. If you control the stream's origin, adding
+    <code>Access-Control-Allow-Origin: *</code> to playlists and segments
+    fixes it (the same header hls.js-based web players require).
+  </div>
 
   <section class="card">
     <span class="badge">Recommended on iPad &amp; iPhone</span>
@@ -128,10 +150,10 @@
     </p>
     <p class="why muted">
       Fine print: the launchers only see the top frame, so players embedded
-      in cross-origin iframes are invisible to them — and the monitor page
-      needs the stream's server to send CORS headers (almost all CDNs do).
-      On desktop Chrome, the <a href="https://github.com/kindlyops/hls-monitor">extension</a>
-      has neither restriction and also watches the page's own player.
+      in cross-origin iframes are invisible to them. On desktop Chrome, the
+      <a href="https://github.com/kindlyops/hls-monitor">extension</a> has
+      neither that restriction nor the CORS requirement, and watches the
+      page's own player.
     </p>
   </section>
 
