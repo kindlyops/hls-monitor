@@ -17,12 +17,13 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+# Build and deploy are separate jobs so a transient Pages failure can be
+# retried with "re-run failed jobs": re-running a job that both uploads and
+# deploys would upload a second github-pages artifact into the same run,
+# which deploy-pages rejects ("Multiple artifacts named ... found").
 jobs:
-  deploy:
+  build:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/configure-pages@v5
@@ -34,5 +35,13 @@ jobs:
       - uses: actions/upload-pages-artifact@v3
         with:
           path: site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
       - id: deployment
         uses: actions/deploy-pages@v4
