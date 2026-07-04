@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HLS Monitor</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%232a78d6'/><path d='M5 4l7 4-7 4z' fill='white'/></svg>" />
+  <link rel="stylesheet" href="ui.css" />
+  <style>
+    /* monitor-page extras on top of the shared dashboard styles */
+    #srcForm {
+      display: flex;
+      gap: 8px;
+      margin: 14px 0;
+      max-width: 640px;
+    }
+    #srcForm input {
+      flex: 1;
+      font: inherit;
+      color: var(--text-primary);
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 6px 10px;
+      min-width: 0;
+    }
+    #candidates li { margin: 6px 0; overflow-wrap: anywhere; }
+    #banner {
+      border: 1px solid var(--status-critical);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin: 0 0 14px;
+      color: var(--status-critical);
+      background: var(--surface-1);
+    }
+    #variantWrap select {
+      font: inherit;
+      color: var(--text-primary);
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 4px 8px;
+      max-width: 260px;
+    }
+  </style>
+</head>
+<body data-mode="page">
+  <div id="app"></div>
+  <script type="module" src="monitor.js"></script>
+</body>
+</html>

@@ -1,0 +1,167 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HLS Monitor on iPad &amp; mobile</title>
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'><rect width='16' height='16' rx='3' fill='%232a78d6'/><path d='M5 4l7 4-7 4z' fill='white'/></svg>" />
+  <link rel="stylesheet" href="ui.css" />
+  <style>
+    body { max-width: 720px; margin: 0 auto; padding: 24px 20px 60px; font-size: 14px; }
+    h1 { font-size: 24px; margin: 0 0 6px; }
+    .lede { color: var(--text-secondary); margin: 0 0 26px; line-height: 1.5; }
+    section.card { margin-bottom: 18px; padding: 16px 18px; }
+    section.card h2 { font-size: 16px; color: var(--text-primary); margin-bottom: 4px; }
+    section.card .why { color: var(--text-secondary); margin: 0 0 12px; line-height: 1.5; }
+    ol { margin: 0 0 12px; padding-left: 22px; line-height: 1.7; }
+    pre {
+      background: var(--page);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      overflow-x: auto;
+      font-size: 11.5px;
+      line-height: 1.45;
+      white-space: pre-wrap;
+      word-break: break-all;
+    }
+    .copyRow { display: flex; gap: 8px; align-items: center; margin-bottom: 6px; }
+    .badge {
+      display: inline-block;
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--series-1);
+      margin-bottom: 6px;
+    }
+    #bmLink {
+      display: inline-block;
+      padding: 6px 14px;
+      border: 1px dashed var(--baseline);
+      border-radius: 8px;
+      font-weight: 600;
+      text-decoration: none;
+      color: var(--text-primary);
+      background: var(--surface-1);
+    }
+    .back { display: inline-block; margin-bottom: 18px; }
+    .getBtn {
+      display: inline-block;
+      padding: 10px 22px;
+      border-radius: 10px;
+      font-size: 15px;
+      font-weight: 700;
+      text-decoration: none;
+      color: #fff;
+      background: var(--series-1);
+    }
+    details { margin-top: 4px; }
+    summary { cursor: pointer; margin-bottom: 10px; }
+  </style>
+</head>
+<body>
+  <a class="back" href="./">&larr; HLS Monitor</a>
+  <h1>Monitor a stream from iPad &amp; mobile</h1>
+  <p class="lede">
+    Browsers on iPadOS and iOS can't run Chrome extensions, so HLS Monitor
+    ships as a web page instead: the <a href="monitor.html">monitor page</a>
+    plays the stream's playlist and segments itself and measures every
+    request. The two launchers below grab the stream URL from whatever page
+    is currently playing it and open the monitor in one tap.
+  </p>
+
+  <section class="card">
+    <span class="badge">Recommended on iPad &amp; iPhone</span>
+    <h2>Apple Shortcut — "Monitor HLS" in the share sheet</h2>
+    <p class="why">
+      One tap to install. Afterwards: play a stream in Safari, tap
+      <b>Share&nbsp;→&nbsp;Monitor&nbsp;HLS</b>, and the dashboard opens.
+      (The first run asks permission to run JavaScript on the page — allow it.)
+    </p>
+    <p>
+      <a class="getBtn" href="https://www.icloud.com/shortcuts/9cdd5023d6f84dc3b01a5444f1db9969">Get the Shortcut</a>
+    </p>
+    <details>
+      <summary class="muted">Or build it yourself (2 minutes)</summary>
+      <ol>
+        <li>Open the <b>Shortcuts</b> app and create a new shortcut.</li>
+        <li>Add the action <b>Run JavaScript on Web Page</b> (search "javascript") and replace its example code with the code below.</li>
+        <li>Add an <b>Open URLs</b> action after it — set its URL to the magic variable <b>JavaScript Result</b>.</li>
+        <li>Name it <b>Monitor HLS</b>. In the shortcut's info panel, enable <b>Show in Share Sheet</b>.</li>
+        <li>Play a stream in Safari, tap Share → Monitor HLS.</li>
+      </ol>
+      <div class="copyRow">
+        <button id="copyShortcut" class="primary">Copy shortcut code</button>
+        <span id="copiedShortcut" class="muted" hidden>copied</span>
+      </div>
+      <pre id="shortcutCode">loading…</pre>
+    </details>
+  </section>
+
+  <section class="card">
+    <span class="badge">Any browser, zero install</span>
+    <h2>Bookmarklet</h2>
+    <p class="why">
+      The same discovery code as a bookmark. Works in Safari and Chrome on
+      iPad, and in every desktop browser.
+    </p>
+    <ol>
+      <li><b>iPad/iPhone:</b> copy the code below, bookmark any page, then edit that bookmark: rename it "Monitor HLS" and paste the code in place of the address.</li>
+      <li><b>Desktop:</b> drag this to your bookmarks bar: <a id="bmLink" href="#">Monitor HLS</a></li>
+      <li>On a page that's playing a stream, open the bookmark.</li>
+    </ol>
+    <div class="copyRow">
+      <button id="copyBm" class="primary">Copy bookmarklet</button>
+      <span id="copiedBm" class="muted" hidden>copied</span>
+    </div>
+    <pre id="bmCode">loading…</pre>
+  </section>
+
+  <section class="card">
+    <h2>Or skip the launchers</h2>
+    <p class="why">
+      If you already have the playlist URL, just open the
+      <a href="monitor.html">monitor page</a> and paste it in.
+    </p>
+    <p class="why muted">
+      Fine print: the launchers only see the top frame, so players embedded
+      in cross-origin iframes are invisible to them — and the monitor page
+      needs the stream's server to send CORS headers (almost all CDNs do).
+      On desktop Chrome, the <a href="https://github.com/kindlyops/hls-monitor">extension</a>
+      has neither restriction and also watches the page's own player.
+    </p>
+  </section>
+
+  <script>
+    // Build both launcher variants from the canonical snippet so the code
+    // shown always matches launcher.js and points at this site's monitor
+    // page (a locally served site yields locally pointing launchers).
+    const monitorUrl = new URL("monitor.html", location.href).href;
+    fetch("launcher.js")
+      .then((r) => r.text())
+      .then((src) => {
+        const body = src.slice(src.indexOf("\n(function") + 1);
+        const fill = (mode) =>
+          body.replace("__MONITOR_URL__", monitorUrl).replace("__MODE__", mode);
+        const shortcutCode = fill("shortcut");
+        const bookmarklet = "javascript:" + encodeURIComponent(fill("bookmarklet").replace(/\s+/g, " "));
+
+        document.getElementById("shortcutCode").textContent = shortcutCode;
+        document.getElementById("bmCode").textContent = bookmarklet;
+        document.getElementById("bmLink").href = bookmarklet;
+
+        const wire = (btnId, noteId, text) => {
+          document.getElementById(btnId).addEventListener("click", async () => {
+            await navigator.clipboard.writeText(text());
+            const note = document.getElementById(noteId);
+            note.hidden = false;
+            setTimeout(() => (note.hidden = true), 1500);
+          });
+        };
+        wire("copyShortcut", "copiedShortcut", () => shortcutCode);
+        wire("copyBm", "copiedBm", () => bookmarklet);
+      });
+  </script>
+</body>
+</html>
