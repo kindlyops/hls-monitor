@@ -11,8 +11,9 @@ export class LineChart {
     this.canvas = canvas;
     this.opts = opts;
     this.points = []; // {t, v, label}
-    this.marks = []; // {t, label} - failed requests, drawn as vertical marks
+    this.marks = []; // {t, label, name} - failed requests, drawn as vertical marks
     this.hoverIdx = null;
+    this.hoverMark = null;
 
     this.tooltip = document.createElement("div");
     this.tooltip.className = "chart-tooltip";
@@ -23,6 +24,7 @@ export class LineChart {
     canvas.addEventListener("mousemove", (e) => this.onMove(e));
     canvas.addEventListener("mouseleave", () => {
       this.hoverIdx = null;
+      this.hoverMark = null;
       this.tooltip.style.display = "none";
       this.draw();
     });
@@ -118,24 +120,25 @@ export class LineChart {
 
     // error marks: dashed vertical line + ✗ at each failed request
     const crit = cssVar("--status-critical");
-    for (const m of this.marks) {
-      if (m.t < S.t0 || m.t > S.t1) continue;
+    this.marks.forEach((m, i) => {
+      if (m.t < S.t0 || m.t > S.t1) return;
+      const hovered = this.hoverMark === i;
       const xx = S.x(m.t);
       ctx.strokeStyle = crit;
-      ctx.lineWidth = 1.5;
-      ctx.setLineDash([4, 3]);
+      ctx.lineWidth = hovered ? 2.5 : 1.5;
+      ctx.setLineDash(hovered ? [] : [4, 3]);
       ctx.beginPath();
       ctx.moveTo(xx, L.pad.t);
       ctx.lineTo(xx, L.pad.t + L.ph);
       ctx.stroke();
       ctx.setLineDash([]);
       ctx.fillStyle = crit;
-      ctx.font = "bold 11px system-ui, sans-serif";
+      ctx.font = (hovered ? "bold 14px" : "bold 11px") + " system-ui, sans-serif";
       ctx.textAlign = "center";
       ctx.textBaseline = "middle";
       ctx.fillText("✗", xx, L.pad.t + 6);
       ctx.font = "10px system-ui, sans-serif";
-    }
+    });
 
     // series line
     ctx.strokeStyle = color;
@@ -186,29 +189,60 @@ export class LineChart {
         best = i;
       }
     });
-    this.hoverIdx = best;
-    this.draw();
-    const p = this.points[best];
-    const d = new Date(p.t);
-    const time =
-      String(d.getHours()).padStart(2, "0") +
-      ":" +
-      String(d.getMinutes()).padStart(2, "0") +
-      ":" +
-      String(d.getSeconds()).padStart(2, "0");
+    let bestM = null;
+    let bestMD = Infinity;
+    this.marks.forEach((m, i) => {
+      if (m.t < this._S.t0 || m.t > this._S.t1) return;
+      const d = Math.abs(this._S.x(m.t) - mx);
+      if (d < bestMD) {
+        bestMD = d;
+        bestM = i;
+      }
+    });
+
+    const fmtTime = (t) => {
+      const d = new Date(t);
+      return (
+        String(d.getHours()).padStart(2, "0") +
+        ":" +
+        String(d.getMinutes()).padStart(2, "0") +
+        ":" +
+        String(d.getSeconds()).padStart(2, "0")
+      );
+    };
     this.tooltip.innerHTML = "";
     const strong = document.createElement("strong");
-    strong.textContent = this.opts.fmtValue(p.v);
+    const span = document.createElement("span");
+    let xx, yy;
+
+    if (bestM !== null && bestMD <= bestD) {
+      // an error mark is closest: show an error-styled tooltip
+      const m = this.marks[bestM];
+      this.hoverMark = bestM;
+      this.hoverIdx = null;
+      this.tooltip.classList.add("err");
+      strong.textContent = "✗ ERROR · " + m.label;
+      span.textContent = (m.name ? m.name + " · " : "") + fmtTime(m.t);
+      xx = this._S.x(m.t);
+      yy = 24;
+    } else {
+      const p = this.points[best];
+      this.hoverIdx = best;
+      this.hoverMark = null;
+      this.tooltip.classList.remove("err");
+      strong.textContent = this.opts.fmtValue(p.v);
+      span.textContent = (p.label ? p.label + " · " : "") + fmtTime(p.t);
+      xx = this._S.x(p.t);
+      yy = Math.max(4, this._S.y(p.v) - 34);
+    }
+    this.draw();
     this.tooltip.appendChild(strong);
     this.tooltip.appendChild(document.createElement("br"));
-    const span = document.createElement("span");
-    span.textContent = (p.label ? p.label + " · " : "") + time;
     this.tooltip.appendChild(span);
     this.tooltip.style.display = "block";
-    const xx = this._S.x(p.t);
-    const flip = xx > rect.width - 130;
+    const flip = xx > rect.width - 170;
     this.tooltip.style.left = flip ? "" : xx + 12 + "px";
     this.tooltip.style.right = flip ? rect.width - xx + 12 + "px" : "";
-    this.tooltip.style.top = Math.max(4, this._S.y(p.v) - 34) + "px";
+    this.tooltip.style.top = yy + "px";
   }
 }

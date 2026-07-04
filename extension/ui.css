@@ -224,6 +224,12 @@ body[data-mode] .tiles {
 .chart-tooltip strong {
   color: var(--text-primary);
 }
+.chart-tooltip.err {
+  border-color: var(--status-critical);
+}
+.chart-tooltip.err strong {
+  color: var(--status-critical);
+}
 .table-wrap {
   overflow-x: auto;
 }

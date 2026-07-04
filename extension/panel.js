@@ -260,7 +260,7 @@ function initDashboard() {
     );
     const failMarks = st.segments
       .filter((r) => r.error || (r.status && r.status >= 400))
-      .map((r) => ({ t: r.end, label: r.error || String(r.status) }));
+      .map((r) => ({ t: r.end, label: r.error || "HTTP " + r.status, name: r.name }));
     ttfbChart.setMarks(failMarks);
     bpsChart.setMarks(failMarks);
     ttfbChart.setData(

@@ -101,6 +101,25 @@ check(Number(segCount) >= 4, `dashboard shows segment count (got "${segCount}")`
 check(/ms/.test(ttfbTile), `dashboard shows TTFB (got "${ttfbTile}")`);
 check(statusLabel.length > 1 && statusLabel !== "–", `dashboard status derived (got "${statusLabel}")`);
 
+// hover across the TTFB chart until the error mark's tooltip appears
+const chartBox = await panel.locator("#ttfbChart").boundingBox();
+let errTooltip = "";
+for (let fx = 0.02; fx <= 0.98; fx += 0.02) {
+  await panel.mouse.move(chartBox.x + chartBox.width * fx, chartBox.y + chartBox.height * 0.5);
+  const t = await panel.evaluate(() => {
+    const el = document.querySelector(".chart-tooltip.err");
+    return el && el.style.display !== "none" ? el.textContent : "";
+  });
+  if (t) {
+    errTooltip = t;
+    break;
+  }
+}
+check(
+  errTooltip.includes("ERROR") && errTooltip.includes("404"),
+  `error tooltip indicates the failure (got "${errTooltip}")`
+);
+
 const shot = path.join(here, "..", "dashboard.png");
 await panel.screenshot({ path: shot, fullPage: true });
 console.log("\ndashboard screenshot:", shot);
