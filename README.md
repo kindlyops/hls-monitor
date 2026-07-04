@@ -58,8 +58,8 @@ variant picker (highest bandwidth auto-selected). The only requirement is
 that the stream's server sends CORS headers, which nearly all CDNs do.
 
 Two one-tap launchers discover the stream URL on whatever page is currently
-playing it (from Resource Timing and `<video>` elements) and open the
-monitor — set them up at
+playing it (from Resource Timing, `<video>` elements, and `.m3u8` URLs
+embedded in the page markup) and open the monitor — set them up at
 **<https://kindlyops.github.io/hls-monitor/ipad.html>**:
 
 - an **Apple Shortcuts** share-sheet action (best on iPad/iPhone), and

@@ -135,6 +135,24 @@ check(
   `shortcut variant hands the monitor URL to completion() (got "${completed}")`
 );
 
+// Page-source scan: the URL only exists in an embedded player config (no
+// request made, no video element), with an HTML-escaped query ampersand.
+const cfgPage = await context.newPage();
+await cfgPage.setContent(
+  '<html><body><div data-player-config=\'{"src":"https://cdn.example.com/live/master.m3u8?a=1&amp;b=2"}\'></div></body></html>'
+);
+const cfgFound = await cfgPage.evaluate((code) => {
+  const calls = [];
+  window.open = (u) => calls.push(u);
+  new Function(code)();
+  return calls;
+}, fill("bookmarklet"));
+check(
+  decodeURIComponent((cfgFound[0] || "").split("#src=")[1] || "") ===
+    "https://cdn.example.com/live/master.m3u8?a=1&b=2",
+  `page-source scan finds config-embedded URL and unescapes &amp; (got "${cfgFound[0]}")`
+);
+
 // The bookmarklet-encoded form must survive URL-encoding + whitespace collapse.
 const encoded = "javascript:" + encodeURIComponent(fill("bookmarklet").replace(/\s+/g, " "));
 const decodedRuns = await player.evaluate((href) => {

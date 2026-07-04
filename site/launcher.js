@@ -3,12 +3,14 @@
 // renders it as a bookmarklet and as the code to paste into an Apple
 // Shortcuts "Run JavaScript on Web Page" action.
 //
-// It runs inside the page currently playing the stream. Two lookups:
+// It runs inside the page currently playing the stream. Three lookups:
 // Resource Timing catches everything MSE players fetch (even behind blob:
-// video srcs), and video/source elements catch native HLS playback, which
-// Resource Timing does not record. __MODE__ becomes "shortcut" (hand the
-// monitor URL to the Shortcut's completion() for its Open URLs action) or
-// "bookmarklet" (open the tab directly).
+// video srcs); video/source elements catch native HLS playback, which
+// Resource Timing does not record; and a scan of the page markup catches
+// absolute .m3u8 URLs sitting in player configs before any request fires.
+// __MODE__ becomes "shortcut" (hand the monitor URL to the Shortcut's
+// completion() for its Open URLs action) or "bookmarklet" (open the tab
+// directly).
 //
 // No line comments or template literals below this header: the IIFE (from
 // the first line starting with "(function") is whitespace-collapsed into a
@@ -32,6 +34,9 @@
   document.querySelectorAll("video,source").forEach(function (el) {
     add(el.currentSrc || el.src);
   });
+  var html = document.documentElement ? document.documentElement.innerHTML : "";
+  html = html.replace(/&quot;/g, '"').replace(/&#0?39;/g, "'").replace(/&amp;/g, "&");
+  (html.match(/https?:\/\/[^"'\s<>()\\]+\.m3u8[^"'\s<>()\\]*/gi) || []).forEach(add);
   var list = Object.keys(found);
   var target = list.length
     ? monitor + "#src=" + list.map(encodeURIComponent).join(",")
