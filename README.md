@@ -54,12 +54,21 @@ monitor: give it an `.m3u8` URL and it fetches the playlist and segments
 itself on the standard HLS cadence, measuring every request — the same
 dashboard as the extension, in any browser on any device. It doesn't decode
 video; like the extension, it measures delivery. Master playlists get a
-variant picker (highest bandwidth auto-selected). The only requirement is
-that the stream's server sends CORS headers, which nearly all CDNs do.
+variant picker (highest bandwidth auto-selected).
+
+**The catch: it only works on CORS-enabled streams.** A web page can only
+read another origin's responses if that server sends
+`Access-Control-Allow-Origin`, and many streams don't. When the header is
+missing the monitor shows a CORS error and can go no further — no browser
+page can, that's the browser's cross-origin rule. The Chrome extension has
+no such limit (it observes the player's own traffic), so streams without
+CORS can only be monitored from desktop. If you control the origin, adding
+`Access-Control-Allow-Origin: *` to playlists and segments enables the
+monitor page.
 
 Two one-tap launchers discover the stream URL on whatever page is currently
-playing it (from Resource Timing and `<video>` elements) and open the
-monitor — set them up at
+playing it (from Resource Timing, `<video>` elements, and `.m3u8` URLs
+embedded in the page markup) and open the monitor — set them up at
 **<https://kindlyops.github.io/hls-monitor/ipad.html>**:
 
 - an **Apple Shortcuts** share-sheet action (best on iPad/iPhone), and

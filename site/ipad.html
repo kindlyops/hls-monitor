@@ -9,7 +9,17 @@
   <style>
     body { max-width: 720px; margin: 0 auto; padding: 24px 20px 60px; font-size: 14px; }
     h1 { font-size: 24px; margin: 0 0 6px; }
-    .lede { color: var(--text-secondary); margin: 0 0 26px; line-height: 1.5; }
+    .lede { color: var(--text-secondary); margin: 0 0 18px; line-height: 1.5; }
+    #corsNote {
+      border: 1px solid var(--status-warning);
+      border-radius: 8px;
+      padding: 10px 12px;
+      margin: 0 0 26px;
+      line-height: 1.5;
+      color: var(--text-secondary);
+      background: var(--surface-1);
+    }
+    #corsNote b { color: var(--text-primary); }
     section.card { margin-bottom: 18px; padding: 16px 18px; }
     section.card h2 { font-size: 16px; color: var(--text-primary); margin-bottom: 4px; }
     section.card .why { color: var(--text-secondary); margin: 0 0 12px; line-height: 1.5; }
@@ -70,17 +80,31 @@
     request. The two launchers below grab the stream URL from whatever page
     is currently playing it and open the monitor in one tap.
   </p>
+  <div id="corsNote">
+    <b>Works only on CORS-enabled streams.</b> A web page may read another
+    origin's responses only if that server sends
+    <code>Access-Control-Allow-Origin</code>, and many streams don't. If the
+    monitor reports a CORS error, that stream can't be measured from any
+    browser page — that's a browser rule, not a bug. Use the
+    <a href="https://github.com/kindlyops/hls-monitor">Chrome extension</a>
+    on desktop for those; it watches the player's own traffic and needs no
+    CORS. If you control the stream's origin, adding
+    <code>Access-Control-Allow-Origin: *</code> to playlists and segments
+    fixes it (the same header hls.js-based web players require).
+  </div>
 
   <section class="card">
     <span class="badge">Recommended on iPad &amp; iPhone</span>
     <h2>Apple Shortcut — "Monitor HLS" in the share sheet</h2>
     <p class="why">
-      One tap to install. Afterwards: play a stream in Safari, tap
+      One tap to install. Afterwards: play a stream in <b>Safari</b>, tap
       <b>Share&nbsp;→&nbsp;Monitor&nbsp;HLS</b>, and the dashboard opens.
-      (The first run asks permission to run JavaScript on the page — allow it.)
+      The first run asks permission to run JavaScript on the page — allow it.
+      Safari only: other iPad browsers can't hand a web page to Shortcuts —
+      use the bookmarklet below in those.
     </p>
     <p>
-      <a class="getBtn" href="https://www.icloud.com/shortcuts/9cdd5023d6f84dc3b01a5444f1db9969">Get the Shortcut</a>
+      <a class="getBtn" href="https://www.icloud.com/shortcuts/d6cfd5f300ef4d68ba21a1afecd0cd60">Get the Shortcut</a>
     </p>
     <details>
       <summary class="muted">Or build it yourself (2 minutes)</summary>
@@ -88,7 +112,7 @@
         <li>Open the <b>Shortcuts</b> app and create a new shortcut.</li>
         <li>Add the action <b>Run JavaScript on Web Page</b> (search "javascript") and replace its example code with the code below.</li>
         <li>Add an <b>Open URLs</b> action after it — set its URL to the magic variable <b>JavaScript Result</b>.</li>
-        <li>Name it <b>Monitor HLS</b>. In the shortcut's info panel, enable <b>Show in Share Sheet</b>.</li>
+        <li>Name it <b>Monitor HLS</b>. In the shortcut's info panel, enable <b>Show in Share Sheet</b>, and set what it <b>Receives</b> to <b>Safari web pages</b> only (if it receives URLs instead, the JavaScript action silently gets nothing).</li>
         <li>Play a stream in Safari, tap Share → Monitor HLS.</li>
       </ol>
       <div class="copyRow">
@@ -126,10 +150,10 @@
     </p>
     <p class="why muted">
       Fine print: the launchers only see the top frame, so players embedded
-      in cross-origin iframes are invisible to them — and the monitor page
-      needs the stream's server to send CORS headers (almost all CDNs do).
-      On desktop Chrome, the <a href="https://github.com/kindlyops/hls-monitor">extension</a>
-      has neither restriction and also watches the page's own player.
+      in cross-origin iframes are invisible to them. On desktop Chrome, the
+      <a href="https://github.com/kindlyops/hls-monitor">extension</a> has
+      neither that restriction nor the CORS requirement, and watches the
+      page's own player.
     </p>
   </section>
 
