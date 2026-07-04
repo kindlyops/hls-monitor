@@ -1,0 +1,55 @@
+name: Release extension
+
+# Publishes a versioned, installable ZIP of the extension whenever a version
+# tag is pushed:
+#
+#   git tag v0.2.0
+#   git push origin v0.2.0
+#
+# The tag's version is stamped into extension/manifest.json, the extension
+# directory is zipped, and a GitHub Release is created with the ZIP attached.
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Stamp manifest version from tag
+        run: |
+          VERSION="${GITHUB_REF_NAME#v}"
+          # Chrome requires 1-4 dot-separated integers.
+          if ! [[ "$VERSION" =~ ^[0-9]+(\.[0-9]+){0,3}$ ]]; then
+            echo "Tag '$GITHUB_REF_NAME' is not a valid extension version (want vN, vN.N, vN.N.N, or vN.N.N.N)" >&2
+            exit 1
+          fi
+          jq --arg v "$VERSION" '.version = $v' extension/manifest.json > manifest.tmp
+          mv manifest.tmp extension/manifest.json
+          echo "Manifest version set to $VERSION"
+
+      - name: Package extension
+        run: |
+          cd extension
+          zip -r "../hls-monitor-extension-${GITHUB_REF_NAME}.zip" .
+          cd ..
+          unzip -l "hls-monitor-extension-${GITHUB_REF_NAME}.zip"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: hls-monitor-extension-*.zip
+          generate_release_notes: true
+          body: |
+            **Install on Chrome (desktop):** download the ZIP below, unzip it,
+            open `chrome://extensions`, turn on **Developer mode**, click
+            **Load unpacked**, and select the unzipped folder.
+
+            Full instructions (including mobile options): see the
+            [README](https://github.com/${{ github.repository }}#install).
