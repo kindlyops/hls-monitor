@@ -75,12 +75,14 @@
     <span class="badge">Recommended on iPad &amp; iPhone</span>
     <h2>Apple Shortcut — "Monitor HLS" in the share sheet</h2>
     <p class="why">
-      One tap to install. Afterwards: play a stream in Safari, tap
+      One tap to install. Afterwards: play a stream in <b>Safari</b>, tap
       <b>Share&nbsp;→&nbsp;Monitor&nbsp;HLS</b>, and the dashboard opens.
-      (The first run asks permission to run JavaScript on the page — allow it.)
+      The first run asks permission to run JavaScript on the page — allow it.
+      Safari only: other iPad browsers can't hand a web page to Shortcuts —
+      use the bookmarklet below in those.
     </p>
     <p>
-      <a class="getBtn" href="https://www.icloud.com/shortcuts/9cdd5023d6f84dc3b01a5444f1db9969">Get the Shortcut</a>
+      <a class="getBtn" href="https://www.icloud.com/shortcuts/d6cfd5f300ef4d68ba21a1afecd0cd60">Get the Shortcut</a>
     </p>
     <details>
       <summary class="muted">Or build it yourself (2 minutes)</summary>
@@ -88,7 +90,7 @@
         <li>Open the <b>Shortcuts</b> app and create a new shortcut.</li>
         <li>Add the action <b>Run JavaScript on Web Page</b> (search "javascript") and replace its example code with the code below.</li>
         <li>Add an <b>Open URLs</b> action after it — set its URL to the magic variable <b>JavaScript Result</b>.</li>
-        <li>Name it <b>Monitor HLS</b>. In the shortcut's info panel, enable <b>Show in Share Sheet</b>.</li>
+        <li>Name it <b>Monitor HLS</b>. In the shortcut's info panel, enable <b>Show in Share Sheet</b>, and set what it <b>Receives</b> to <b>Safari web pages</b> only (if it receives URLs instead, the JavaScript action silently gets nothing).</li>
         <li>Play a stream in Safari, tap Share → Monitor HLS.</li>
       </ol>
       <div class="copyRow">
