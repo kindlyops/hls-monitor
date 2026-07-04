@@ -1,0 +1,159 @@
+:root {
+  --surface-1: #fcfcfb;
+  --page: #f9f9f7;
+  --text-primary: #0b0b0b;
+  --text-secondary: #52514e;
+  --text-muted: #898781;
+  --grid: #e1e0d9;
+  --baseline: #c3c2b7;
+  --border: rgba(11, 11, 11, 0.1);
+  --series-1: #2a78d6; /* blue: TTFB */
+  --series-2: #1baf7a; /* aqua: throughput */
+  --status-good: #0ca30c;
+  --status-good-text: #006300;
+  --status-warning: #fab219;
+  --status-serious: #ec835a;
+  --status-critical: #d03b3b;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --surface-1: #1a1a19;
+    --page: #0d0d0d;
+    --text-primary: #ffffff;
+    --text-secondary: #c3c2b7;
+    --text-muted: #898781;
+    --grid: #2c2c2a;
+    --baseline: #383835;
+    --border: rgba(255, 255, 255, 0.1);
+    --series-1: #3987e5;
+    --series-2: #199e70;
+    --status-good-text: #0ca30c;
+  }
+}
+
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  font-size: 13px;
+  color: var(--text-primary);
+  background: var(--page);
+}
+h1 {
+  font-size: 16px;
+  font-weight: 650;
+  margin: 0;
+}
+h2 {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+a {
+  color: var(--series-1);
+}
+button {
+  font: inherit;
+  color: var(--text-primary);
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 5px 12px;
+  cursor: pointer;
+}
+button:hover {
+  border-color: var(--baseline);
+}
+button.primary {
+  background: var(--series-1);
+  border-color: var(--series-1);
+  color: #fff;
+}
+
+.pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  font-weight: 600;
+  font-size: 12px;
+  border: 1px solid var(--border);
+  background: var(--surface-1);
+}
+.pill .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex: none;
+}
+.pill.good .dot { background: var(--status-good); }
+.pill.good { color: var(--status-good-text); }
+.pill.warning .dot { background: var(--status-warning); }
+.pill.serious .dot { background: var(--status-serious); }
+.pill.critical .dot { background: var(--status-critical); }
+.pill.critical { color: var(--status-critical); }
+.pill.idle .dot { background: var(--text-muted); }
+.pill.idle { color: var(--text-muted); }
+
+.tiles {
+  display: grid;
+  gap: 10px;
+}
+.tile {
+  background: var(--surface-1);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.tile .label {
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 3px;
+  white-space: nowrap;
+}
+.tile .value {
+  font-size: 19px;
+  font-weight: 650;
+  line-height: 1.2;
+}
+.tile .sub {
+  font-size: 11px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+.tile .value.bad {
+  color: var(--status-critical);
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+th {
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  padding: 6px 8px;
+  border-bottom: 1px solid var(--baseline);
+  white-space: nowrap;
+}
+td {
+  padding: 5px 8px;
+  border-bottom: 1px solid var(--grid);
+  white-space: nowrap;
+}
+td.num, th.num {
+  text-align: right;
+}
+tr.err td {
+  color: var(--status-critical);
+}
+.muted {
+  color: var(--text-muted);
+}

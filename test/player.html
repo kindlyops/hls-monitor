@@ -1,0 +1,69 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>Synthetic HLS player (test page)</title>
+  <style>
+    body { font-family: system-ui, sans-serif; margin: 24px; max-width: 720px; }
+    h1 { font-size: 18px; }
+    #log { font: 12px/1.5 ui-monospace, monospace; white-space: pre-wrap;
+           background: #111; color: #9e9; padding: 12px; border-radius: 8px;
+           height: 320px; overflow-y: auto; }
+    .err { color: #f88; }
+  </style>
+</head>
+<body>
+  <h1>Synthetic HLS player</h1>
+  <p>
+    Polls <code>/stream/live.m3u8</code> once per second and downloads every
+    new segment — the same network pattern a real HLS player (hls.js, video.js)
+    produces. Use it to exercise the HLS Monitor extension.
+  </p>
+  <div id="log"></div>
+  <script>
+    const PLAYLIST = "/stream/live.m3u8";
+    const logEl = document.getElementById("log");
+    const seen = new Set();
+
+    function log(msg, err) {
+      const line = document.createElement("div");
+      if (err) line.className = "err";
+      line.textContent = new Date().toISOString().slice(11, 23) + "  " + msg;
+      logEl.appendChild(line);
+      logEl.scrollTop = logEl.scrollHeight;
+    }
+
+    async function fetchSegment(name) {
+      const t0 = performance.now();
+      try {
+        const resp = await fetch("/stream/" + name, { cache: "no-store" });
+        const buf = await resp.arrayBuffer();
+        const ms = Math.round(performance.now() - t0);
+        if (!resp.ok) log(`${name} -> HTTP ${resp.status} (${ms} ms)`, true);
+        else log(`${name} -> ${buf.byteLength} bytes in ${ms} ms`);
+      } catch (e) {
+        log(`${name} -> ${e}`, true);
+      }
+    }
+
+    async function tick() {
+      try {
+        const resp = await fetch(PLAYLIST, { cache: "no-store" });
+        const text = await resp.text();
+        for (const line of text.split("\n")) {
+          const name = line.trim();
+          if (name && !name.startsWith("#") && !seen.has(name)) {
+            seen.add(name);
+            fetchSegment(name);
+          }
+        }
+      } catch (e) {
+        log("playlist -> " + e, true);
+      }
+    }
+
+    tick();
+    setInterval(tick, 1000);
+  </script>
+</body>
+</html>

@@ -1,0 +1,174 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>HLS Monitor</title>
+  <link rel="stylesheet" href="ui.css" />
+  <style>
+    body {
+      padding: 16px 20px 40px;
+      max-width: 1100px;
+      margin: 0 auto;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-bottom: 4px;
+    }
+    header .spacer { flex: 1; }
+    #detail {
+      color: var(--text-secondary);
+      margin: 2px 0 14px;
+      min-height: 16px;
+    }
+    #pageUrl {
+      color: var(--text-muted);
+      font-size: 12px;
+      max-width: 420px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+    .tiles {
+      grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+      margin-bottom: 16px;
+    }
+    .charts {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+    @media (max-width: 800px) {
+      .charts { grid-template-columns: 1fr; }
+    }
+    .card {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px;
+      overflow: hidden;
+    }
+    .chart-tooltip {
+      position: absolute;
+      pointer-events: none;
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 5px 8px;
+      font-size: 11px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+      color: var(--text-secondary);
+      z-index: 5;
+    }
+    .chart-tooltip strong { color: var(--text-primary); }
+    .table-wrap {
+      overflow-x: auto;
+    }
+    #playlists td:first-child {
+      max-width: 340px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    #streamList { margin-top: 20px; }
+    #streamList li { margin: 6px 0; }
+    section { margin-bottom: 16px; }
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+    }
+    .controls label {
+      display: inline-flex;
+      gap: 5px;
+      align-items: center;
+      color: var(--text-secondary);
+      font-size: 12px;
+    }
+  </style>
+</head>
+<body>
+  <div id="picker" style="display:none">
+    <h1>HLS Monitor</h1>
+    <p class="muted">Select a tab with a detected HLS stream:</p>
+    <ul id="streamList"></ul>
+    <p id="noStreams" class="muted" style="display:none">
+      No HLS streams detected yet. Open a page that plays an HLS stream (a
+      <code>.m3u8</code> playlist), then come back here.
+    </p>
+  </div>
+
+  <div id="dash" style="display:none">
+    <header>
+      <h1>HLS Monitor</h1>
+      <span id="status" class="pill idle"><span class="dot"></span><span id="statusLabel">–</span></span>
+      <span id="pageUrl"></span>
+      <span class="spacer"></span>
+      <div class="controls">
+        <label><input type="checkbox" id="parseToggle" checked /> parse playlists</label>
+        <button id="exportBtn">Export JSON</button>
+        <button id="clearBtn">Clear</button>
+      </div>
+    </header>
+    <p id="detail"></p>
+
+    <div class="tiles">
+      <div class="tile"><div class="label">Segments loaded</div><div class="value" id="segCount">–</div><div class="sub" id="segBytes"></div></div>
+      <div class="tile"><div class="label">Errors</div><div class="value" id="errCount">–</div></div>
+      <div class="tile"><div class="label">TTFB avg / p95</div><div class="value" id="ttfb">–</div></div>
+      <div class="tile"><div class="label">Throughput avg / min</div><div class="value" id="bps">–</div></div>
+      <div class="tile"><div class="label">Download speed</div><div class="value" id="speed">–</div><div class="sub">× realtime (avg / min)</div></div>
+      <div class="tile"><div class="label">Last segment</div><div class="value" id="lastSeg">–</div></div>
+      <div class="tile"><div class="label">Playlist refresh</div><div class="value" id="refresh">–</div><div class="sub" id="targetDur"></div></div>
+      <div class="tile"><div class="label">Media sequence</div><div class="value" id="mediaSeq">–</div><div class="sub" id="seqAge"></div></div>
+    </div>
+
+    <div class="charts">
+      <div class="card">
+        <h2>Segment TTFB (ms)</h2>
+        <div><canvas id="ttfbChart"></canvas></div>
+      </div>
+      <div class="card">
+        <h2>Segment throughput (Mbps)</h2>
+        <div><canvas id="bpsChart"></canvas></div>
+      </div>
+    </div>
+
+    <section class="card">
+      <h2>Playlists</h2>
+      <div class="table-wrap">
+        <table id="playlists">
+          <thead>
+            <tr>
+              <th>Playlist</th><th>Type</th><th class="num">Fetches</th>
+              <th class="num">Errors</th><th class="num">Refresh (median)</th>
+              <th class="num">Target dur</th><th class="num">Media seq</th><th>Advancing</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Recent requests <span class="muted" id="reqNote"></span></h2>
+      <div class="table-wrap">
+        <table id="requests">
+          <thead>
+            <tr>
+              <th>Time</th><th>Type</th><th>Name</th><th class="num">Status</th>
+              <th class="num">Size</th><th class="num">TTFB</th><th class="num">Download</th>
+              <th class="num">Total</th><th class="num">Throughput</th><th>Cache</th><th>Error</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <script type="module" src="panel.js"></script>
+</body>
+</html>

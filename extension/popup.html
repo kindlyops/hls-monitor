@@ -1,0 +1,54 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="ui.css" />
+  <style>
+    body {
+      width: 320px;
+      padding: 12px;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+    #detail {
+      color: var(--text-secondary);
+      margin: 0 0 10px;
+      min-height: 16px;
+    }
+    .tiles {
+      grid-template-columns: 1fr 1fr;
+      margin-bottom: 12px;
+    }
+    footer {
+      display: flex;
+      gap: 8px;
+    }
+    footer button {
+      flex: 1;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>HLS Monitor</h1>
+    <span id="status" class="pill idle"><span class="dot"></span><span id="statusLabel">–</span></span>
+  </header>
+  <p id="detail"></p>
+  <div class="tiles">
+    <div class="tile"><div class="label">Segments</div><div class="value" id="segCount">–</div></div>
+    <div class="tile"><div class="label">Errors</div><div class="value" id="errCount">–</div></div>
+    <div class="tile"><div class="label">Avg TTFB</div><div class="value" id="ttfb">–</div></div>
+    <div class="tile"><div class="label">Avg throughput</div><div class="value" id="bps">–</div></div>
+    <div class="tile"><div class="label">Download speed</div><div class="value" id="speed">–</div><div class="sub">vs realtime</div></div>
+    <div class="tile"><div class="label">Last segment</div><div class="value" id="lastSeg">–</div></div>
+  </div>
+  <footer>
+    <button class="primary" id="openPanel">Open dashboard</button>
+  </footer>
+  <script type="module" src="popup.js"></script>
+</body>
+</html>
