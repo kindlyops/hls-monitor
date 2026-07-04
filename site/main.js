@@ -30,11 +30,21 @@ const camTarget = new THREE.Vector3(0.6, 3.0, 0);
 camera.position.copy(camBase);
 camera.lookAt(camTarget);
 
+// The composition is tuned for 16:9. On narrower windows, keep the whole
+// scene in frame: widen the vertical fov to preserve the horizontal extent,
+// and dolly the camera back once the fov clamp is reached.
+const BASE_ASPECT = 16 / 9;
+const BASE_HALF_FOV = THREE.MathUtils.degToRad(25); // half of the 50° base fov
+let camDolly = 1;
 function resize() {
   const w = window.innerWidth;
   const h = window.innerHeight;
   renderer.setSize(w, h, false);
   camera.aspect = w / h;
+  const need = Math.max(1, BASE_ASPECT / camera.aspect);
+  const fovScale = Math.min(need, 1.6);
+  camera.fov = 2 * THREE.MathUtils.radToDeg(Math.atan(Math.tan(BASE_HALF_FOV) * fovScale));
+  camDolly = need / fovScale; // > 1 only for very narrow (portrait) windows
   camera.updateProjectionMatrix();
 }
 window.addEventListener("resize", resize);
@@ -881,9 +891,10 @@ function animate() {
   // browser panel floats
   browserGroup.position.y = 4.8 + Math.sin(time * 0.9) * 0.08;
 
-  // camera parallax
+  // camera parallax + aspect-based dolly
   camera.position.x = camBase.x + mouse.x * 1.6 + Math.sin(time * 0.12) * 0.4;
   camera.position.y = camBase.y - mouse.y * 0.9;
+  camera.position.z = camBase.z * camDolly;
   camera.lookAt(camTarget);
 
   renderer.render(scene, camera);

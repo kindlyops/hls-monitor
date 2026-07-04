@@ -38,7 +38,10 @@ $("openPanel").addEventListener("click", () => {
 
 $("openSide").addEventListener("click", async () => {
   // Must run synchronously off the click (user gesture) to be allowed.
+  // The panel is disabled by default on tabs without a stream, so enable it
+  // for this tab first - an explicit click is explicit intent.
   try {
+    await chrome.sidePanel.setOptions({ tabId, path: "sidepanel.html", enabled: true });
     await chrome.sidePanel.open({ tabId });
     window.close();
   } catch (e) {

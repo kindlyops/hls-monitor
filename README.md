@@ -46,15 +46,15 @@ cannot be installed in mobile Chrome itself.
 - **iOS/iPadOS**: there is currently no way to run Chrome extensions on
   iOS. Monitor a stream from a desktop browser instead.
 
-### Releasing a new version
+### Releases
 
-Push a version tag and GitHub Actions builds the ZIP, stamps the version
-into the manifest, and publishes a GitHub Release:
+Every merge to `main` that changes `extension/` automatically publishes a
+new GitHub Release: the workflow patch-bumps the latest version tag (e.g.
+`v0.1.3` → `v0.1.4`, starting at `v0.1.0`), stamps the version into
+`manifest.json`, and attaches the installable ZIP.
 
-```sh
-git tag v0.2.0
-git push origin v0.2.0
-```
+For a minor or major bump, run the **Release extension** workflow manually
+from the Actions tab and enter the version (e.g. `0.3.0`).
 
 ## Use
 
@@ -65,7 +65,9 @@ git push origin v0.2.0
   the player page, so you can watch the livestream and its metrics at the
   same time. It follows the active tab, and its header has a live segment
   counter with a pulse animation that fires each time a new video segment
-  arrives.
+  arrives. The panel is only available on tabs with a detected stream —
+  switching to a tab without one hides it. Failed requests are drawn as red
+  ✗ marks on the charts.
 - **Full dashboard** (popup → *Full dashboard*): the same view as a full
   page — live charts of per-segment TTFB and throughput, playlist health
   (refresh cadence, media sequence, advancement), a table of recent
