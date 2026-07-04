@@ -43,6 +43,24 @@ playlists to read their bodies (needed for target duration, media sequence,
 and per-segment durations). It is throttled to the player's own refresh
 cadence; turn it off if you don't want the extra origin requests.
 
+## Website
+
+`site/` is a three.js landing page for the extension: a broadcast tower
+streams video frames along a glowing pipeline while the Inspector — a
+certain consulting detective — examines each one with his magnifying glass.
+Good segments earn a `✓ 200 OK` and land in a floating browser window; bad
+ones are flagged `✗ 404` and ejected. The stream continues on to a retro TV
+watched by an old man on his couch, and a live HUD tallies segments
+inspected, delivered, and flagged.
+
+The page is fully self-contained (three.js is vendored), so any static file
+server works:
+
+```sh
+python3 -m http.server 8899 -d site
+# then open http://127.0.0.1:8899/
+```
+
 ## Test drive locally
 
 `test/server.py` is a fake live HLS origin (sliding-window playlist like
