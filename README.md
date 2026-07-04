@@ -91,7 +91,7 @@ The landing page is served with GitHub Pages at
 
 `site/` is a three.js landing page for the extension: a broadcast tower
 streams video frames along a glowing pipeline while the Inspector — a
-certain consulting detective — examines each one with his magnifying glass.
+scientist with glasses and a clipboard — checks each one as it flows by.
 Good segments earn a `✓ 200 OK` and land in a floating browser window; bad
 ones are flagged `✗ 404` and ejected. The stream continues on to a retro TV
 watched by an old man on his couch, and a live HUD tallies segments

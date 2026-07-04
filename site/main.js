@@ -1,11 +1,12 @@
 // HLS Monitor landing scene.
 //
 // A broadcast tower streams video frames along a glowing pipeline. The
-// Inspector (a certain consulting detective) examines each frame with his
-// magnifying glass: good frames earn a "200 OK" and land in a floating
-// browser window; bad ones are flagged and ejected from the pipeline. The
-// browser feeds a living-room TV, where an old man on his couch enjoys the
-// livestream, blissfully unaware of the detective work upstream.
+// Inspector - a scientist with her clipboard - checks each frame as it
+// flows past her station: good frames earn a "200 OK" and land in a
+// floating browser window; bad ones are flagged and ejected from the
+// pipeline. The browser feeds a living-room TV, where an old man on his
+// couch enjoys the livestream, blissfully unaware of the quality control
+// happening upstream.
 
 import * as THREE from "three";
 
@@ -310,99 +311,87 @@ for (let i = 0; i < N_FRAMES; i++) {
   spawn(f, i / N_FRAMES);
 }
 
-// ---------------------------------------------------------------- the Inspector
+// ------------------------------------------- the Inspector (a scientist)
 
 function buildInspector() {
   const g = new THREE.Group();
+  const coat = new THREE.MeshStandardMaterial({ color: 0xf2f0ea, roughness: 0.85 });
+  const trousers = new THREE.MeshStandardMaterial({ color: 0x3d4a5c, roughness: 0.9 });
+  const hairMat = new THREE.MeshStandardMaterial({ color: 0x4a3524, roughness: 0.9 });
 
-  // coat + cape
-  g.add(cyl(0.34, 0.5, 1.25, tweed, 0, 1.05, 0)); // body
-  const cape = cyl(0.32, 0.78, 0.85, tweedDark, 0, 1.42, 0);
-  g.add(cape);
-  // legs & shoes
-  g.add(cyl(0.11, 0.13, 0.5, dark, -0.16, 0.25, 0));
-  g.add(cyl(0.11, 0.13, 0.5, dark, 0.16, 0.25, 0));
-  g.add(box(0.16, 0.09, 0.32, dark, -0.16, 0.05, 0.06));
-  g.add(box(0.16, 0.09, 0.32, dark, 0.16, 0.05, 0.06));
+  // lab coat, trousers, shoes
+  g.add(cyl(0.28, 0.42, 1.15, coat, 0, 1.1, 0));
+  g.add(cyl(0.17, 0.29, 0.16, coat, 0, 1.72, 0)); // collar
+  g.add(cyl(0.09, 0.11, 0.55, trousers, -0.14, 0.28, 0));
+  g.add(cyl(0.09, 0.11, 0.55, trousers, 0.14, 0.28, 0));
+  g.add(box(0.14, 0.08, 0.3, dark, -0.14, 0.05, 0.05));
+  g.add(box(0.14, 0.08, 0.3, dark, 0.14, 0.05, 0.05));
+  // ID badge on the coat
+  g.add(box(0.11, 0.14, 0.02, new THREE.MeshStandardMaterial({ color: 0x2a78d6 }), 0.13, 1.4, 0.27));
 
-  // head group (tracks frames)
+  // head group (tracks the frames flowing by)
   const head = new THREE.Group();
-  head.position.set(0, 2.02, 0);
-  head.add(sphere(0.3, skin));
-  const nose = cyl(0.02, 0.055, 0.16, skin, 0, -0.02, 0.3);
+  head.position.set(0, 2.0, 0);
+  head.add(sphere(0.28, skin));
+  // hair: cap swept back into a bun
+  const cap = sphere(0.3, hairMat, 0, 0.04, -0.06);
+  cap.scale.set(1, 0.95, 0.95);
+  head.add(cap);
+  const bun = sphere(0.14, hairMat, 0, 0.16, -0.3);
+  head.add(bun);
+  // glasses
+  const rimL = new THREE.Mesh(new THREE.TorusGeometry(0.085, 0.014, 8, 24), metal);
+  rimL.position.set(-0.11, 0.02, 0.26);
+  const rimR = rimL.clone();
+  rimR.position.x = 0.11;
+  head.add(rimL, rimR);
+  head.add(box(0.06, 0.016, 0.016, metal, 0, 0.02, 0.28)); // bridge
+  const nose = cyl(0.02, 0.05, 0.14, skin, 0, -0.06, 0.28);
   nose.rotation.x = Math.PI / 2;
   head.add(nose);
-  // pipe
-  const pipeStem = cyl(0.022, 0.022, 0.3, dark, 0.1, -0.14, 0.36);
-  pipeStem.rotation.x = Math.PI / 2.6;
-  pipeStem.rotation.z = -0.25;
-  head.add(pipeStem);
-  head.add(cyl(0.05, 0.04, 0.09, dark, 0.14, -0.22, 0.47));
-  // deerstalker hat
-  const dome = sphere(0.31, tweed, 0, 0.16, 0);
-  dome.scale.set(1, 0.72, 1);
-  head.add(dome);
-  const brimF = cyl(0.02, 0.3, 0.34, tweed, 0, 0.13, 0.3);
-  brimF.rotation.x = Math.PI / 2.25;
-  head.add(brimF);
-  const brimB = cyl(0.02, 0.3, 0.34, tweed, 0, 0.13, -0.3);
-  brimB.rotation.x = -Math.PI / 2.25;
-  head.add(brimB);
-  const flapL = sphere(0.12, tweedDark, -0.28, 0.05, 0);
-  flapL.scale.set(0.35, 1, 0.8);
-  head.add(flapL);
-  const flapR = flapL.clone();
-  flapR.position.x = 0.28;
-  head.add(flapR);
-  head.add(sphere(0.045, tweedDark, 0, 0.4, 0)); // top button
   g.add(head);
 
-  // left arm behind back
-  const armL = cyl(0.075, 0.075, 0.62, tweed, -0.38, 1.35, -0.12);
+  // left arm cradling the clipboard against her
+  const armL = cyl(0.065, 0.065, 0.55, coat, -0.32, 1.42, 0.18);
+  armL.rotation.x = 1.05;
   armL.rotation.z = 0.5;
-  armL.rotation.x = -0.5;
   g.add(armL);
-
-  // right arm extended, holding the magnifying glass
-  const armR = new THREE.Group();
-  armR.position.set(0.32, 1.62, 0.05);
-  const upper = cyl(0.075, 0.075, 0.7, tweed, 0, -0.05, 0.32);
-  upper.rotation.x = Math.PI / 2.4;
-  armR.add(upper);
-  armR.add(sphere(0.08, skin, 0, 0.1, 0.62)); // hand
-  const magnifier = new THREE.Group();
-  magnifier.position.set(0, 0.12, 0.66);
-  const handle = cyl(0.035, 0.045, 0.42, wood, 0, 0.02, 0);
-  handle.rotation.x = Math.PI / 2.6;
-  magnifier.add(handle);
-  const rim = new THREE.Mesh(new THREE.TorusGeometry(0.32, 0.045, 12, 32), metal);
-  rim.position.set(0, 0.42, 0.16);
-  rim.rotation.x = Math.PI / 3.2;
-  magnifier.add(rim);
-  const lens = new THREE.Mesh(
-    new THREE.CircleGeometry(0.3, 32),
-    new THREE.MeshPhysicalMaterial({
-      color: 0xbfe8ff,
-      transparent: true,
-      opacity: 0.28,
-      roughness: 0,
-      side: THREE.DoubleSide,
-    })
+  g.add(sphere(0.07, skin, -0.14, 1.3, 0.42)); // left hand
+  const clipboard = new THREE.Group();
+  const board = box(0.42, 0.56, 0.025, wood, 0, 0, 0);
+  clipboard.add(board);
+  const paper = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.36, 0.48),
+    new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.9 })
   );
-  lens.position.copy(rim.position);
-  lens.rotation.copy(rim.rotation);
-  magnifier.add(lens);
-  armR.add(magnifier);
+  paper.position.z = 0.02;
+  clipboard.add(paper);
+  clipboard.add(box(0.16, 0.05, 0.05, metal, 0, 0.28, 0.01)); // clip
+  clipboard.position.set(-0.02, 1.32, 0.42);
+  clipboard.rotation.x = -0.55; // tilted up toward her eyes
+  clipboard.rotation.y = 0.15;
+  g.add(clipboard);
+
+  // right hand holding a pen over the clipboard
+  const armR = cyl(0.065, 0.065, 0.5, coat, 0.32, 1.42, 0.16);
+  armR.rotation.x = 0.95;
+  armR.rotation.z = -0.55;
   g.add(armR);
+  g.add(sphere(0.07, skin, 0.16, 1.28, 0.4)); // right hand
+  const pen = cyl(0.015, 0.015, 0.22, dark, 0.13, 1.34, 0.44);
+  pen.rotation.x = 0.9;
+  pen.rotation.z = -0.5;
+  g.add(pen);
 
   g.traverse((m) => (m.castShadow = true));
-  return { group: g, head, magnifier };
+  return { group: g, head };
 }
 
 const inspector = buildInspector();
 inspector.group.scale.setScalar(1.45);
 inspector.group.position.set(scanPoint.x - 0.2, 0, scanPoint.z + 1.7);
-inspector.group.lookAt(scanPoint.x, 0, scanPoint.z);
+// quarter turn toward the camera so the clipboard and glasses read clearly
+inspector.group.lookAt(scanPoint.x + 2.2, 0, scanPoint.z + 4.4);
 scene.add(inspector.group);
 
 // a Victorian street lamp keeps the Inspector out of the shadows
@@ -426,7 +415,7 @@ scene.add(inspector.group);
   scene.add(post);
 }
 
-// scan beam from the magnifier toward the pipeline
+// scan beam flashing at the inspection point as frames pass
 const beam = new THREE.Mesh(
   new THREE.ConeGeometry(0.75, 2.1, 24, 1, true),
   new THREE.MeshBasicMaterial({
