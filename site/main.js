@@ -390,8 +390,9 @@ function buildInspector() {
 const inspector = buildInspector();
 inspector.group.scale.setScalar(1.45);
 inspector.group.position.set(scanPoint.x - 0.2, 0, scanPoint.z + 1.7);
-// quarter turn toward the camera so the clipboard and glasses read clearly
-inspector.group.lookAt(scanPoint.x + 2.2, 0, scanPoint.z + 4.4);
+// body faces the incoming stream (upstream), so the camera sees her in
+// side profile with the clipboard held out in front of her
+inspector.group.lookAt(scanPoint.x - 4.5, 0, scanPoint.z + 1.7);
 scene.add(inspector.group);
 
 // a Victorian street lamp keeps the Inspector out of the shadows
@@ -829,10 +830,10 @@ function animate() {
   }
 
   // Inspector: bob gently, head tracks the frame nearest the scan zone
+  // (lookAt points the head's +z - her face - at the frame)
   inspector.group.position.y = Math.sin(time * 1.4) * 0.04;
   if (nearestToScan && nearestDist < 0.12) {
     inspector.head.lookAt(nearestToScan.group.position);
-    inspector.head.rotateY(Math.PI); // model faces +z
   }
 
   // scan beam flash
