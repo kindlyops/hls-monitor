@@ -39,7 +39,8 @@ let camDolly = 1;
 function resize() {
   const w = window.innerWidth;
   const h = window.innerHeight;
-  renderer.setSize(w, h, false);
+  renderer.setSize(w, h); // updateStyle=true: keeps the canvas CSS size at
+  // window size while the buffer scales by devicePixelRatio (HiDPI displays)
   camera.aspect = w / h;
   const need = Math.max(1, BASE_ASPECT / camera.aspect);
   const fovScale = Math.min(need, 1.6);
