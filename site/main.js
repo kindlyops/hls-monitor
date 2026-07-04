@@ -38,10 +38,13 @@ const BASE_ASPECT = 16 / 9;
 const BASE_HALF_FOV = THREE.MathUtils.degToRad(25); // half of the 50° base fov
 let camDolly = 1;
 function resize() {
-  const w = window.innerWidth;
-  const h = window.innerHeight;
-  renderer.setSize(w, h); // updateStyle=true: keeps the canvas CSS size at
-  // window size while the buffer scales by devicePixelRatio (HiDPI displays)
+  // Size from the canvas's CSS box, not the window: on phones the stylesheet
+  // gives the scene only the top slice of the viewport (updateStyle=false so
+  // the inline size never overrides that CSS; the buffer still scales by
+  // devicePixelRatio).
+  const w = canvas.clientWidth;
+  const h = canvas.clientHeight;
+  renderer.setSize(w, h, false);
   camera.aspect = w / h;
   const need = Math.max(1, BASE_ASPECT / camera.aspect);
   const fovScale = Math.min(need, 1.6);

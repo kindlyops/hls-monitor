@@ -125,8 +125,21 @@
       padding: 7px 16px;
       white-space: nowrap;
     }
+    /* Phones: stack instead of overlay — the scene gets the top of the
+       viewport to itself and the hero card scrolls below it. */
     @media (max-width: 760px) {
-      #hero { max-width: calc(100vw - 48px); }
+      html, body { height: auto; }
+      body { overflow: hidden auto; }
+      #scene {
+        position: static;
+        height: 58vh;
+        height: 58svh;
+      }
+      #hero {
+        position: static;
+        max-width: none;
+        margin: 14px 16px 28px;
+      }
       #stats { display: none; }
       #hint { display: none; }
     }
