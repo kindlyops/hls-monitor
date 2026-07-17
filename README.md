@@ -74,8 +74,6 @@ On **iPhone, iPad, and Mac**, the native
 **[HLSMonitor: Live Video QA](https://apps.apple.com/us/app/hlsmonitor-live-video-qa/id6787537308)**
 app is the easiest path — it plays the stream directly (no CORS limit) and
 exports a PDF report.
-**<https://kindlyops.github.io/hls-monitor/ipad.html>** points Apple users at
-the app and everyone else at the monitor page.
 
 Limitation of the monitor page vs the extension: it measures its own fetches
 rather than the page player's traffic.
