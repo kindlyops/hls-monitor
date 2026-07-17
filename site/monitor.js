@@ -650,8 +650,8 @@ function initDashboard() {
 
 // ------------------------------------------------------------ startup
 
-// Parse the raw hash rather than URLSearchParams: each candidate URL is
-// encodeURIComponent-ed exactly once by the launchers, and URLSearchParams
+// Parse the raw hash rather than URLSearchParams: each candidate URL in a
+// "#src=" deep link is encodeURIComponent-ed exactly once, and URLSearchParams
 // would add a second decode (and turn literal "+" into spaces).
 function candidatesFromHash() {
   const h = location.hash.replace(/^#/, "");
