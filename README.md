@@ -43,11 +43,14 @@ cannot be installed in mobile Chrome itself.
 - **Android**: use a Chromium-based browser that supports extensions — for
   example **Microsoft Edge Canary** or **Lemur Browser**. Enable developer
   mode on its extensions page and load the same release ZIP.
-- **iOS/iPadOS**: there is no way to run Chrome extensions on iOS — use the
-  [monitor page](#monitor-without-the-extension-ipad-mobile-any-browser)
-  instead, which needs no install at all.
+- **iOS/iPadOS/Mac**: there is no way to run Chrome extensions on iOS — get
+  the native **[HLSMonitor: Live Video QA](https://apps.apple.com/us/app/hlsmonitor-live-video-qa/id6787537308)**
+  app from the App Store instead. It measures HLS delivery — segment timing,
+  playback stalls, bitrate switching, and audio loudness — and exports a PDF
+  report. Because it plays the stream itself, it has no browser CORS limits.
+  (Requires iOS/iPadOS 18.5+, or macOS 15.5+ on Apple silicon.)
 
-## Monitor without the extension (iPad, mobile, any browser)
+## Monitor without the extension (Android, mobile, any browser)
 
 **<https://kindlyops.github.io/hls-monitor/monitor.html>** is a standalone
 monitor: give it an `.m3u8` URL and it fetches the playlist and segments
@@ -60,24 +63,20 @@ variant picker (highest bandwidth auto-selected).
 read another origin's responses if that server sends
 `Access-Control-Allow-Origin`, and many streams don't. When the header is
 missing the monitor shows a CORS error and can go no further — no browser
-page can, that's the browser's cross-origin rule. The Chrome extension has
-no such limit (it observes the player's own traffic), so streams without
-CORS can only be monitored from desktop. If you control the origin, adding
+page can, that's the browser's cross-origin rule. The Chrome extension (it
+observes the player's own traffic) and the native app (it plays the stream
+itself) have no such limit, so streams without CORS can be monitored from
+desktop or an Apple device. If you control the origin, adding
 `Access-Control-Allow-Origin: *` to playlists and segments enables the
 monitor page.
 
-Two one-tap launchers discover the stream URL on whatever page is currently
-playing it (from Resource Timing, `<video>` elements, and `.m3u8` URLs
-embedded in the page markup) and open the monitor — set them up at
-**<https://kindlyops.github.io/hls-monitor/ipad.html>**:
+On **iPhone, iPad, and Mac**, the native
+**[HLSMonitor: Live Video QA](https://apps.apple.com/us/app/hlsmonitor-live-video-qa/id6787537308)**
+app is the easiest path — it plays the stream directly (no CORS limit) and
+exports a PDF report.
 
-- an **Apple Shortcuts** share-sheet action (best on iPad/iPhone), and
-- a **bookmarklet** (works everywhere, including desktop browsers, with
-  zero install).
-
-Limitations vs the extension: launchers can't see players inside
-cross-origin iframes, and the monitor measures its own fetches rather than
-the page player's traffic.
+Limitation of the monitor page vs the extension: it measures its own fetches
+rather than the page player's traffic.
 
 ### Releases
 
@@ -166,7 +165,7 @@ python3 -m http.server 8899 -d site
 
 ```sh
 node test/verify.mjs          # extension
-node test/verify-monitor.mjs  # monitor page + launcher discovery
+node test/verify-monitor.mjs  # monitor page
 ```
 
 `verify.mjs` starts the fake origin, loads the extension into headless
@@ -175,6 +174,5 @@ Chromium via Playwright, streams for ~14s, asserts the recorded metrics
 and screenshots the dashboard to `dashboard.png`.
 
 `verify-monitor.mjs` does the same for the monitor page (served statically
-from `site/`), and also runs the launcher discovery snippet inside the
-synthetic player page and asserts it finds the playlist URL. Screenshot goes
-to `monitor.png`.
+from `site/`), pointing it at the fake origin's playlist and asserting the
+recorded metrics and rendered dashboard. Screenshot goes to `monitor.png`.

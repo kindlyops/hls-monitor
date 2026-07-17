@@ -1,17 +1,14 @@
-// End-to-end check for the standalone monitor page and the launcher snippet.
+// End-to-end check for the standalone monitor page.
 //
 // Starts the fake live HLS origin (server.py) and a static server for site/,
 // opens monitor.html pointed at the local live playlist, lets it monitor for
-// ~14s, then asserts the recorded metrics and the rendered dashboard. Also
-// runs the launcher discovery snippet (launcher.js) inside the synthetic
-// player page and asserts it finds the playlist and opens the monitor.
+// ~14s, then asserts the recorded metrics and the rendered dashboard.
 //
 //   node test/verify-monitor.mjs
 //
 // Requires the playwright npm package (a global install is picked up too).
 
 import { spawn, execSync } from "node:child_process";
-import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 
@@ -98,77 +95,6 @@ check(statusLabel.length > 1 && statusLabel !== "–", `dashboard status derived
 const shot = path.join(here, "..", "monitor.png");
 await page.screenshot({ path: shot, fullPage: true });
 console.log("\nmonitor screenshot:", shot);
-
-// ---------------------------------------------------------- launcher snippet
-
-// Build both variants exactly like ipad.html does.
-const launcherSrc = readFileSync(path.join(siteDir, "launcher.js"), "utf8");
-const body = launcherSrc.slice(launcherSrc.indexOf("\n(function") + 1);
-const fill = (mode) => body.replace("__MONITOR_URL__", MONITOR).replace("__MODE__", mode);
-
-const player = await context.newPage();
-await player.goto(`http://127.0.0.1:${ORIGIN_PORT}/`);
-await player.waitForTimeout(2500); // let the synthetic player fetch the playlist
-
-console.log("\nlauncher checks:");
-const opened = await player.evaluate((code) => {
-  const calls = [];
-  window.open = (u) => calls.push(u);
-  new Function(code)();
-  return calls;
-}, fill("bookmarklet"));
-check(opened.length === 1, "bookmarklet variant opens one tab");
-check(
-  (opened[0] || "").startsWith(`${MONITOR}#src=`) &&
-    decodeURIComponent((opened[0] || "").split("#src=")[1] || "").includes("live.m3u8"),
-  `bookmarklet found the playlist (got "${opened[0]}")`
-);
-
-const completed = await player.evaluate((code) => {
-  let result = null;
-  // Shortcuts defines completion() in scope for Run JavaScript on Web Page.
-  new Function("completion", code)((v) => (result = v));
-  return result;
-}, fill("shortcut"));
-check(
-  (completed || "").startsWith(`${MONITOR}#src=`),
-  `shortcut variant hands the monitor URL to completion() (got "${completed}")`
-);
-
-// Page-source scan: the URL only exists in an embedded player config (no
-// request made, no video element), with an HTML-escaped query ampersand.
-const cfgPage = await context.newPage();
-await cfgPage.setContent(
-  '<html><body><div data-player-config=\'{"src":"https://cdn.example.com/live/master.m3u8?a=1&amp;b=2"}\'></div></body></html>'
-);
-const cfgFound = await cfgPage.evaluate((code) => {
-  const calls = [];
-  window.open = (u) => calls.push(u);
-  new Function(code)();
-  return calls;
-}, fill("bookmarklet"));
-check(
-  decodeURIComponent((cfgFound[0] || "").split("#src=")[1] || "") ===
-    "https://cdn.example.com/live/master.m3u8?a=1&b=2",
-  `page-source scan finds config-embedded URL and unescapes &amp; (got "${cfgFound[0]}")`
-);
-
-// The bookmarklet-encoded form must survive URL-encoding + whitespace collapse.
-const encoded = "javascript:" + encodeURIComponent(fill("bookmarklet").replace(/\s+/g, " "));
-const decodedRuns = await player.evaluate((href) => {
-  const calls = [];
-  window.open = (u) => calls.push(u);
-  new Function(decodeURIComponent(href.slice("javascript:".length)))();
-  return calls.length === 1;
-}, encoded);
-check(decodedRuns, "whitespace-collapsed javascript: URL still runs");
-
-// End-to-end: the URL the bookmarklet opened renders a working dashboard.
-const opened2 = await context.newPage();
-await opened2.goto(opened[0]);
-await opened2.waitForTimeout(6000);
-const segCount2 = await opened2.locator("#segCount").textContent();
-check(Number(segCount2) >= 1, `bookmarklet-opened monitor records segments (got "${segCount2}")`);
 
 await browser.close();
 origin.kill();
